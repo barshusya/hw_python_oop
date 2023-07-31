@@ -1,5 +1,5 @@
 from dataclasses import dataclass, asdict
-from typing import Union
+from typing import Union, Optional
 
 
 @dataclass
@@ -265,9 +265,10 @@ class Swimming(Training):
         return calories
 
 
-def check_data(workout_type: str, data: list[Union[int, float]]) -> str:
+def check_data(workout_type: str,
+               data: list[Union[int, float]]) -> Optional[str]:
     """Check data in package."""
-    result: str = ''
+    result: Optional[str] = None
     if workout_type == 'SWM' and len(data) != 5:
         result = 'Некорректное количество аргументов.'
     elif workout_type == 'RUN' and len(data) != 3:
@@ -317,8 +318,8 @@ if __name__ == '__main__':
     ]
 
     for workout_type, data in packages:
-        check_data_result: str = check_data(workout_type, data)
-        if check_data_result != '':
+        check_data_result: Optional[str] = check_data(workout_type, data)
+        if check_data_result:
             raise ValueError(check_data_result)
 
         training: Training = read_package(workout_type, data)
