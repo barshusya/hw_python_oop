@@ -1,3 +1,8 @@
+from dataclasses import dataclass, asdict
+from typing import Union
+
+
+@dataclass
 class InfoMessage:
     """
     Info message about the training.
@@ -21,26 +26,20 @@ class InfoMessage:
         return info about training results.
     """
 
-    def __init__(self,
-                 training_type: str,
-                 duration: float,
-                 distance: float,
-                 speed: float,
-                 calories: float,
-                 ) -> None:
-        self.training_type = training_type
-        self.duration = duration
-        self.distance = distance
-        self.speed = speed
-        self.calories = calories
+    training_type: str
+    duration: float
+    distance: float
+    speed: float
+    calories: float
 
     def get_message(self) -> str:
         """Return info message."""
-        return (f'Тип тренировки: {self.training_type}; '
-                f'Длительность: {self.duration:.3f} ч.; '
-                f'Дистанция: {self.distance:.3f} км; '
-                f'Ср. скорость: {self.speed:.3f} км/ч; '
-                f'Потрачено ккал: {self.calories:.3f}.')
+        message_template: str = ('Тип тренировки: {training_type}; '
+                                 'Длительность: {duration:.3f} ч.; '
+                                 'Дистанция: {distance:.3f} км; '
+                                 'Ср. скорость: {speed:.3f} км/ч; '
+                                 'Потрачено ккал: {calories:.3f}.')
+        return message_template.format(**asdict(self))
 
 
 class Training:
@@ -67,7 +66,7 @@ class Training:
     show_training_info(class_name, duration, speed, calories) -> str:
         create obj Infomessage with info about the training.
 
-    * Method get_spent_calories() have to be redefined in inherited classes.
+    * Method get_spent_calories() has to be redefined in inherited classes.
 
     Parameters
     ----------
@@ -105,8 +104,8 @@ class Training:
 
     def get_spent_calories(self) -> float:
         """Get the number of burned calories."""
-        raise NotImplementedError('Определите get_spent_calories() '
-                                  f'в {self.__class__.__name__}')
+        raise NotImplementedError('Define get_spent_calories() '
+                                  f'in {type(self).__name__}')
 
     def show_training_info(self) -> InfoMessage:
         """Create InfoMessage with info about the training."""
@@ -266,15 +265,15 @@ class Swimming(Training):
         return calories
 
 
-def check_data(workout_type: str, data: list) -> str:
+def check_data(workout_type: str, data: list[Union[int, float]]) -> str:
     """Check data in package."""
     result: str = ''
     if workout_type == 'SWM' and len(data) != 5:
-        result = 'Некорректный пакет данных.'
+        result = 'Некорректное количество аргументов.'
     elif workout_type == 'RUN' and len(data) != 3:
-        result = 'Некорректный пакет данных.'
+        result = 'Некорректное количество аргументов.'
     elif workout_type == 'WLK' and len(data) != 4:
-        result = 'Некорректный пакет данных.'
+        result = 'Некорректное количество аргументов.'
     elif not (35 < data[2] < 610):
         result = 'Неверно указанный вес.'
     elif workout_type == 'SWM' and not (1 < data[3] < 1013):
@@ -284,8 +283,6 @@ def check_data(workout_type: str, data: list) -> str:
         result = 'Неверно указан рост. Необходимо указать рост в см.'
     elif workout_type not in workouts:
         result = 'Неверно указан шифр тренировки.'
-    else:
-        result = ''
 
     return result
 
@@ -308,7 +305,7 @@ workouts: dict[str, type[Training]] = {
 }
 
 if __name__ == '__main__':
-    packages: list[tuple[str, list]] = [
+    packages: list[tuple[str, list[Union[int, float]]]] = [
         ('SWM', [720, 1, 80, 25, 40]),
         ('RUN', [15000, 1, 75]),
         ('WLK', [9000, 1, 75, 180]),
@@ -322,7 +319,7 @@ if __name__ == '__main__':
     for workout_type, data in packages:
         check_data_result: str = check_data(workout_type, data)
         if check_data_result != '':
-            print(check_data_result)
-        else:
-            training: Training = read_package(workout_type, data)
-            main(training)
+            raise ValueError(check_data_result)
+
+        training: Training = read_package(workout_type, data)
+        main(training)
