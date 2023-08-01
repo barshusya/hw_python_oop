@@ -1,1 +1,1 @@
-# Модуль фитнес-трекера
+# Fitness Tracker Module
