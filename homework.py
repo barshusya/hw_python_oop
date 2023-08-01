@@ -109,7 +109,7 @@ class Training:
 
     def show_training_info(self) -> InfoMessage:
         """Create InfoMessage with info about the training."""
-        return InfoMessage(self.__class__.__name__,
+        return InfoMessage(type(self).__name__,
                            self.duration,
                            self.get_distance(),
                            self.get_mean_speed(),
@@ -265,32 +265,38 @@ class Swimming(Training):
         return calories
 
 
-def check_data(workout_type: str,
-               data: list[Union[int, float]]) -> Optional[str]:
+data_type = list[Union[int, float]]
+
+
+def check_data(workout_type: str, data: data_type) -> Optional[str]:
     """Check data in package."""
     result: Optional[str] = None
     if workout_type == 'SWM' and len(data) != 5:
-        result = 'Некорректное количество аргументов.'
+        result = 'Incorrect number of arguments.'
     elif workout_type == 'RUN' and len(data) != 3:
-        result = 'Некорректное количество аргументов.'
+        result = 'Incorrect number of arguments.'
     elif workout_type == 'WLK' and len(data) != 4:
-        result = 'Некорректное количество аргументов.'
+        result = 'Incorrect number of arguments.'
     elif not (35 < data[2] < 610):
-        result = 'Неверно указанный вес.'
+        result = 'Incorrect weight.'
     elif workout_type == 'SWM' and not (1 < data[3] < 1013):
-        result = ('Неверно указана длина бассейна. '
-                  'Необходимо указать длину в м.')
+        result = ('Incorrect pool length. '
+                  'Pool length has to be in meters.')
     elif workout_type == 'WLK' and not (50 < data[3] < 251):
-        result = 'Неверно указан рост. Необходимо указать рост в см.'
+        result = 'Incorrect height. Height has to be in cantimeters.'
     elif workout_type not in workouts:
-        result = 'Неверно указан шифр тренировки.'
+        result = 'Incorrect trining key.'
+    elif not isinstance(data[0], int):
+        result = 'Incorrect number of steps/strokes.'
+    elif data[4] and not isinstance(data[4], int):
+        result = 'Incorrect number of swimming pools.'
 
     return result
 
 
-def read_package(workout_type: str, data: list) -> Training:
+def read_package(workout_type: str, data: data_type) -> Training:
     """Read data from sensors."""
-    return workouts[workout_type](*data)
+    return workouts[workout_type](*data)  # type: ignore
 
 
 def main(training: Training) -> None:
@@ -306,7 +312,7 @@ workouts: dict[str, type[Training]] = {
 }
 
 if __name__ == '__main__':
-    packages: list[tuple[str, list[Union[int, float]]]] = [
+    packages: list[tuple[str, data_type]] = [
         ('SWM', [720, 1, 80, 25, 40]),
         ('RUN', [15000, 1, 75]),
         ('WLK', [9000, 1, 75, 180]),
